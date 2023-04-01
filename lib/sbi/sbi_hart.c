@@ -48,9 +48,27 @@ static void mstatus_init(struct sbi_scratch *scratch, u32 hartid)
 	/* Enable user/supervisor use of perf counters */
 	if (misa_extension('S') &&
 	    sbi_hart_has_feature(scratch, SBI_HART_HAS_SCOUNTEREN))
+	{
 		csr_write(CSR_SCOUNTEREN, -1);
+		sbi_printf("scounter enabled");
+	}
 	if (sbi_hart_has_feature(scratch, SBI_HART_HAS_MCOUNTEREN))
+	{
 		csr_write(CSR_MCOUNTEREN, -1);
+		sbi_printf("mcounter enabled");
+	}
+
+	csr_write(CSR_MHPMEVENT3, ((1<<8) | 2));	// I-cache miss
+	csr_write(CSR_MHPMEVENT4, ((1<<9) | 2));	// D-cache miss
+	csr_write(CSR_MHPMEVENT5, ((1<<11) | 2));	// I-TLB miss
+	csr_write(CSR_MHPMEVENT6, ((1<<12) | 2));	// D-TLB miss
+
+	// Only available in Rocket, not in BOOM
+	// csr_write(CSR_MHPMEVENT7, ((1<<11) | 1));	// I-cache busy
+	// csr_write(CSR_MHPMEVENT8, ((1<<12) | 1));	// D-cache busy
+	// csr_write(CSR_MHPMEVENT9, ((1<<13) | 1));	// Branch directin misprediction
+	// csr_write(CSR_MHPMEVENT10, ((1<<14) | 1));	// Branch target misprediction
+	// csr_write(CSR_MHPMEVENT11, ((1<<16) | 1));	// Pipeline flushed
 
 	/* Disable all interrupts */
 	csr_write(CSR_MIE, 0);
